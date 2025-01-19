@@ -156,42 +156,8 @@ class AndroidApiLevels:
     # Chromium Android build configuration just to extract the API levels here.
     # Caches the results in api32 and api64 instance variables.
     def Setup(self):
-        print('Creating a temporary GN config to retrieve Android API levels:')
-
-        # Make a temporary GN build output folder
-        # No tempfile.TemporaryDirectory until python 3.2, so instead:
-        tmp_dir = tempfile.mkdtemp(
-            prefix='android_build_ffmpeg_for_api_level_config')
-        print('Created temporary directory ' + tmp_dir)
-
-        # Populate that GN build output folder with generated config for Android as
-        # target OS.
-        with open(os.path.join(tmp_dir, 'args.gn'), 'w') as args_gn_file:
-            args_gn_file.write('target_os = "android"\n')
-            print('Created ' + os.path.realpath(args_gn_file.name))
-
-        # Ask GN to generate build files.
-        PrintAndCheckCall(['gn', 'gen', tmp_dir], cwd=CHROMIUM_ROOT_DIR)
-
-        # Query the API levels in the generated build config.
-        print('Retrieving config vars')
-        config_output = subprocess.check_output(
-            ['gn', 'args', tmp_dir, '--short', '--list'],
-            cwd=CHROMIUM_ROOT_DIR).decode('utf-8')
-
-        # Remove the temporary GN build output folder
-        print('removing temp dir ' + tmp_dir)
-        shutil.rmtree(tmp_dir, ignore_errors=False)
-
-        api64_match = re.search(r'android64_ndk_api_level\s*=\s*(\d{2})',
-                                config_output)
-        api32_match = re.search(r'android32_ndk_api_level\s*=\s*(\d{2})',
-                                config_output)
-        if not api32_match or not api64_match:
-            raise Exception('Failed to find the android api levels')
-
-        self.api32 = api32_match.group(1)
-        self.api64 = api64_match.group(1)
+        self.api32 = '21'
+        self.api64 = '21'
 
     def ApiLevels(self):
         return (self.api32, self.api64)
