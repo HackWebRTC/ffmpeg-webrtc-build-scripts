@@ -678,6 +678,10 @@ IGNORED_INCLUDE_FILES = [
     os.path.join('libavcodec', 'sinewin_fixed_tables.h'),
 
     'bsf.h',
+    'defs.h',
+    'h264.h',
+    'sei.h',
+    'hevc/hevc.h',
     'bsf_internal.h',
     'golomb.h',
     'adts_header.h',
