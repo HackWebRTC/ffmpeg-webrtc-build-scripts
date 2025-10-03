@@ -784,6 +784,12 @@ def GetIncludedSources(file_path, source_dir, include_set, scan_only=False):
     if file_path in include_set:
         return
 
+    root_dir = ''
+    if current_dir.startswith(source_dir) and os.path.dirname(current_dir) != source_dir:
+        pos = current_dir.find(os.path.sep, len(source_dir) + 1)
+        root_dir = current_dir[0:pos]
+        print('rootdir is ', root_dir)
+
     if not scan_only:
         include_set.add(file_path)
     else:
@@ -806,21 +812,23 @@ def GetIncludedSources(file_path, source_dir, include_set, scan_only=False):
         include_path_in_source_dir = os.path.join(source_dir,
                                                   include_file_path)
         resolved_include_path = ''
-
+        include_path_in_root_dir = os.path.join(root_dir, include_file_path)
         # Check if file is in current directory.
         if os.path.isfile(include_path_in_current_dir):
             resolved_include_path = include_path_in_current_dir
         # Else, check source_dir (should be FFmpeg root).
         elif os.path.isfile(include_path_in_source_dir):
             resolved_include_path = include_path_in_source_dir
+        elif len(root_dir) > 0 and os.path.isfile(include_path_in_root_dir):
+            print('use rootdir to resolve', include_path_in_root_dir)
+            resolved_include_path = include_path_in_root_dir
         # Else, we couldn't find it :(.
         elif include_file_path in IGNORED_INCLUDE_FILES:
             continue
         elif include_file_path in MUST_BE_MISSING_INCLUDE_FILES:
             continue
         else:
-            exit('Failed to find file ' + include_file_path + " in " +
-                 file_path)
+            exit('Failed to find file ' + include_file_path + " in " + file_path)
 
         # At this point we've found the file. Check if its in our ignore list which
         # means that the list should be updated to no longer mention this file.
@@ -833,8 +841,7 @@ def GetIncludedSources(file_path, source_dir, include_set, scan_only=False):
         # Also make sure that it's not in our MUST_BE_MISSING list, since it's not
         # missing anymore.
         if include_file_path in MUST_BE_MISSING_INCLUDE_FILES:
-            exit('Found file ' + include_file_path +
-                 ' that should be missing!')
+            exit('Found file ' + include_file_path + ' that should be missing!')
 
         GetIncludedSources(resolved_include_path,
                            source_dir,
